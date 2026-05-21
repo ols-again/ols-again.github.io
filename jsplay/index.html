@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSPLAY – Modern Video Player</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+}
+header {
+    background: linear-gradient(90deg, #fcdc00, #00d1c1);
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #000;
+}
+/* Dil Seçici Butonlar */
+.lang-switcher {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+.lang-btn {
+    background: #000;
+    color: #fff;
+    border: 1px solid #000;
+    padding: 5px 10px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    transition: 0.2s;
+}
+.lang-btn:hover {
+    background: #222;
+}
+.lang-btn.active {
+    background: #00d1c1;
+    color: #000;
+    border-color: #00d1c1;
+}
+main {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 0 20px;
+    line-height: 1.6;
+}
+h2 {
+    color: #fcdc00;
+    border-bottom: 2px solid #00d1c1;
+    padding-bottom: 5px;
+}
+a.button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #00d1c1;
+    color: #000;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-top: 10px;
+    margin-right: 10px;
+    transition: 0.3s;
+}
+a.button:hover {
+    background: #fcdc00;
+    color: #000;
+}
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #ccc;
+    background: #111;
+    margin-top: 60px;
+}
+code {
+    background: #222;
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: #fcdc00;
+}
+/* Dil Gizleme Sınıfı */
+.hidden {
+    display: none !important;
+}
+</style>
+</head>
+<body>
+
+<header>
+    <h1>JSPLAY</h1>
+    <div class="lang-switcher">
+        <button class="lang-btn active" id="btn-tr" onclick="switchLang('tr')">TR</button>
+        <button class="lang-btn" id="btn-en" onclick="switchLang('en')">EN</button>
+    </div>
+</header>
+
+<main>
+    <!-- TÜRKÇE İÇERİK -->
+    <div id="lang-tr">
+        <h2>Tanım</h2>
+        <p>JSPLAY, YouTube tarzı modern, full-page video oynatıcıdır. DRM içermez ve minimalist bir tasarıma sahiptir. Tek videoyu oynatmak için tasarlanmıştır ve playlist sunmaz. Desteklenen video formatlarını Blob olarak yükleyerek basit bir gizleme sağlar ve HLS (M3U8) akışlarını doğrudan oynatır. Video dışındaki dosyalar (PDF, ZIP, TXT vb.) düz dosya olarak yüklenir.</p>
+
+        <h2>Özellikler</h2>
+        <ul>
+            <li>Tam sayfa video, responsive tasarım</li>
+            <li>Blob mantığıyla MP4/MKV/MOV/AVI/WebM gösterimi</li>
+            <li>HLS (M3U8) desteği</li>
+            <li>Video dışı dosyalar düz dosya olarak yüklenir</li>
+            <li>Oynat / durdur butonu (▶ / ⏸)</li>
+            <li>İlerleme çubuğu, ses ve hız kontrolü</li>
+            <li>Ayarlar menüsü ve altyazı desteği (VTT, SRT, ASS)</li>
+            <li>Minimal ve modern tasarım</li>
+            <li>DRM’siz</li>
+        </ul>
+
+        <h2>Kullanım</h2>
+        <p>JSPLAY’i kullanmak için player dosyasını sunucunuza yükleyin ve URL parametresi ile videoyu gönderin:</p>
+        <code>/player/player.html?video=/videos/movie.mp4&sub=/subtitles/movie.vtt</code>
+        
+        <p>Örnek bir bağlantı veya iframe ile sayfanıza entegre edebilirsiniz:</p>
+        <a class="button" href="document.html" target="_blank">Dokümantasyonu Aç</a>
+        <a class="button" href="jsplay.html" download="jsplay.html">Dosyayı İndir</a>
+    </div>
+
+    <!-- İNGİLİZCE İÇERİK -->
+    <div id="lang-en" class="hidden">
+        <h2>Description</h2>
+        <p>JSPLAY is a YouTube-style modern, full-page video player. It features a minimalist design without DRM. It is designed to play a single video and does not provide playlists. It offers simple masking by loading supported video formats as Blobs and directly plays HLS (M3U8) streams. Non-video files (PDF, ZIP, TXT, etc.) are loaded as raw files.</p>
+
+        <h2>Features</h2>
+        <ul>
+            <li>Full-page video, responsive design</li>
+            <li>MP4/MKV/MOV/AVI/WebM playback using Blob logic</li>
+            <li>HLS (M3U8) support</li>
+            <li>Non-video files are loaded as raw files</li>
+            <li>Play / pause button (▶ / ⏸)</li>
+            <li>Progress bar, volume, and speed control</li>
+            <li>Settings menu and subtitle support (VTT, SRT, ASS)</li>
+            <li>Minimal and modern design</li>
+            <li>DRM-free</li>
+        </ul>
+
+        <h2>Usage</h2>
+        <p>To use JSPLAY, upload the player file to your server and pass the video via URL parameters:</p>
+        <code>/player/player.html?video=/videos/movie.mp4&sub=/subtitles/movie.vtt</code>
+        
+        <p>You can integrate it into your page using a sample link or an iframe:</p>
+        <a class="button" href="document.html" target="_blank">Open Documentation</a>
+        <a class="button" href="jsplay.html" download="jsplay.html">Download File</a>
+    </div>
+</main>
+
+<script>
+function switchLang(lang) {
+    // Butonların aktiflik durumunu güncelle
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('btn-' + lang).classList.add('active');
+
+    // HTML dil özniteliğini değiştir
+    document.documentElement.lang = lang;
+
+    // İçerik bloklarını gizle / göster
+    if (lang === 'tr') {
+        document.getElementById('lang-tr').classList.remove('hidden');
+        document.getElementById('lang-en').classList.add('hidden');
+    } else {
+        document.getElementById('lang-en').classList.remove('hidden');
+        document.getElementById('lang-tr').classList.add('hidden');
+    }
+}
+</script>
+
+</body>
+</html>
