@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimal Portfolyo</title>
+    <title>OLS-AGAIN Web Site</title>
     <style>
         /* Modern & Minimalist Reset */
         * {
@@ -25,11 +25,14 @@
             margin: 0 auto;
         }
 
-        /* Header */
+        /* Header & Dil Seçici */
         header {
             margin-bottom: 3rem;
             border-bottom: 1px solid #2A2A2A;
             padding-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         header h1 {
@@ -37,6 +40,27 @@
             font-weight: 700;
             color: #FFFFFF;
             letter-spacing: -0.5px;
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            color: #888888;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            transition: color 0.2s ease;
+        }
+
+        .lang-btn.active {
+            color: #FFFFFF;
+            border-bottom: 2px solid #FFFFFF;
         }
 
         /* Projects Section */
@@ -75,6 +99,25 @@
         .project-card p {
             color: #A0A0A0;
             font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* View Link Button */
+        .view-link {
+            display: inline-flex;
+            align-items: center;
+            color: #FFFFFF;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            background-color: #2A2A2A;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .view-link:hover {
+            background-color: #3A3A3A;
         }
 
         /* Comments (Kreosus) Section */
@@ -92,10 +135,14 @@
             font-weight: 600;
         }
 
-        /* Kreosus Iframe için minimum yükseklik (Arayüz kaymalarını önler) */
         #kreosus {
             min-height: 300px;
             width: 100%;
+        }
+
+        /* Dil Gizleme Sınıfı */
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
@@ -103,39 +150,81 @@
 
     <div class="container">
         
-        <!-- Header -->
+        <!-- Header & Language Switcher -->
         <header>
-            <h1>Projenin Adı / Portfolyo</h1>
+            <h1>OLS-AGAIN</h1>
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="switchLang('tr')">TR</button>
+                <button class="lang-btn" onclick="switchLang('en')">EN</button>
+            </div>
         </header>
 
         <!-- Projeler Alanı -->
         <main>
-            <h2 class="section-title">Projeler</h2>
-            <div class="projects-grid">
-                <!-- JSPLAY Kartı -->
-                <div class="project-card">
-                    <h3>JSPLAY</h3>
-                    <p>HLS (M3U8) desteği ve Blob tabanlı URL maskeleme özelliğine sahip, minimalist tam ekran video oynatıcı projesi.</p>
+            <!-- Türkçe İçerik -->
+            <div id="content-tr" class="lang-content">
+                <h2 class="section-title">Projeler</h2>
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <h3>JSPLAY</h3>
+                        <p>HLS (M3U8) desteğine sahip, minimalist tam ekran video oynatıcı projesi.</p>
+                        <a href="https://ols-again.github.io/jsplay/index.html" class="view-link" target="_blank">Projeyi Görüntüle →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- İngilizce İçerik -->
+            <div id="content-en" class="lang-content hidden">
+                <h2 class="section-title">Projects</h2>
+                <div class="projects-grid">
+                    <div class="project-card">
+                        <h3>JSPLAY</h3>
+                        <p>A minimalist full-screen video player project with HLS (M3U8) support.</p>
+                        <a href="https://ols-again.github.io/jsplay/index.html" class="view-link" target="_blank">View Project →</a>
+                    </div>
                 </div>
             </div>
         </main>
 
         <!-- Yorumlar & Kreosus Alanı -->
         <section id="comments">
-            <h2>Yorumlar</h2>
+            <h2 id="comments-title">Yorumlar</h2>
             <div id="kreosus" data-id="4991"></div>
         </section>
 
     </div>
 
-    <!-- Kreosus API Script (Optimize Edilmiş ve Asenkron) -->
+    <!-- Dil Değiştirme Mantığı -->
+    <script>
+        function switchLang(lang) {
+            // Aktif buton görselini güncelle
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // HTML lang niteliğini değiştir
+            document.documentElement.lang = lang;
+
+            // İçerikleri gizle/göster
+            if (lang === 'tr') {
+                document.getElementById('content-tr').classList.remove('hidden');
+                document.getElementById('content-en').classList.add('hidden');
+                document.getElementById('comments-title').innerText = 'Yorumlar';
+            } else {
+                document.getElementById('content-en').classList.remove('hidden');
+                document.getElementById('content-tr').classList.add('hidden');
+                document.getElementById('comments-title').innerText = 'Comments';
+            }
+        }
+    </script>
+
+    <!-- Kreosus API Script -->
     <script>
         (function(d, s, id) {
             var js, kjs = d.getElementsByTagName(s)[0];
             if (d.getElementById(id)) return;
             js = d.createElement(s);
             js.id = id;
-            js.async = true; /* Sayfa yüklenmesini engellememesi için asenkron yapıldı */
+            js.async = true;
             js.src = 'https://kreosus.com/public/iframe/js/iframe-api.js';
             kjs.parentNode.insertBefore(js, kjs);
         }(document, 'script', 'kreosus-iframe-api'));
