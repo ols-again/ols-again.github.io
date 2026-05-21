@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>JSPLAY – Modern Full Page Player</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<style>
+html,body{margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden;font-family:sans-serif}
+.jsplay{position:relative;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+video{width:100%;height:100%;object-fit:contain;background:#000}
+.controls{position:absolute;bottom:0;width:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;padding:5px 10px;gap:8px;box-sizing:border-box;z-index:10}
+.controls button,input[type=range],select{cursor:pointer;background:#222;color:#fff;border:none;padding:5px;border-radius:4px}
+.controls button:hover,input[type=range]:hover,select:hover{background:#444}
+.progress{flex:1}
+.settings-menu{position:absolute;bottom:40px;right:50px;background:rgba(0,0,0,0.8);color:#fff;padding:10px;border-radius:6px;display:none;flex-direction:column;gap:5px;z-index:11}
+.settings-menu label{display:flex;justify-content:space-between;align-items:center}
+.jsplay:fullscreen .controls,.jsplay:-webkit-full-screen .controls{bottom:0;width:100%;display:flex}
+.jsplay:fullscreen .settings-menu,.jsplay:-webkit-full-screen .settings-menu{bottom:40px;right:50px;display:flex}
+video:fullscreen,video:-webkit-full-screen{width:100%;height:100%}
+</style>
+</head>
+<body>
+<div class="jsplay">
+<video id="video" crossorigin="anonymous"></video>
+<div class="controls">
+<button id="play">▶</button>
+<input type="range" id="progress" class="progress" min="0" max="100" value="0">
+<input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+<select id="speed">
+<option value="0.25">0.25x</option>
+<option value="0.5">0.5x</option>
+<option value="0.75">0.75x</option>
+<option value="1" selected>1x</option>
+<option value="1.25">1.25x</option>
+<option value="1.5">1.5x</option>
+<option value="2">2x</option>
+<option value="5">5x</option>
+<option value="10">10x</option>
+</select>
+<button id="settingsBtn">⚙</button>
+<button id="fullscreenBtn">⛶</button>
+<div class="settings-menu" id="settingsMenu">
+<label>Altyazı <input type="file" id="subFile" accept=".vtt,.srt,.ass"></label>
+</div>
+</div>
+</div>
+<script>
+const video=document.getElementById("video");
+const playBtn=document.getElementById("play");
+const progress=document.getElementById("progress");
+const volume=document.getElementById("volume");
+const speed=document.getElementById("speed");
+const settingsBtn=document.getElementById("settingsBtn");
+const fullscreenBtn=document.getElementById("fullscreenBtn");
+const settingsMenu=document.getElementById("settingsMenu");
+let hls=null;
+let currentObjectURL=null;
+const VIDEO_BLOB_FORMATS=["mp4","avi","mov","wmv","flv","mkv","webm","mxf","ogv","3gp","asf","r3d","ari","ari.r3d","braw","vob","mpg","mpeg","divx","rm","rmvb"];
+
+function getURLParam(name){
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name);
+}
+
+async function JSPLAY_LOAD(url, subtitles){
+    if(!url) return;
+    if(hls){hls.destroy();hls=null;}
+    if(currentObjectURL){URL.revokeObjectURL(currentObjectURL);currentObjectURL=null;}
+    const cleanUrl=url.split("?")[0];
+    let ext=cleanUrl.split(".").pop().toLowerCase();
+    if(cleanUrl.toLowerCase().endsWith("ari.r3d")) ext="ari.r3d";
+    if(ext==="m3u8"){
+        if(Hls.isSupported()){hls=new Hls();hls.loadSource(url);hls.attachMedia(video);}
+        else{video.src=url;}
+        video.play().catch(()=>{});
+    } else if(VIDEO_BLOB_FORMATS.includes(ext)){
+        const response=await fetch(url,{credentials:"same-origin"});
+        if(!response.ok) throw new Error("Video alınamadı: "+url);
+        const blob=await response.blob();
+        currentObjectURL=URL.createObjectURL(blob);
+        video.src=currentObjectURL;
+        video.play().catch(()=>{});
+    } else{
+        video.src=url;
+    }
+    if(subtitles){
+        const track=document.createElement("track");
+        track.kind="subtitles";
+        track.label="Subtitles";
+        track.srclang="tr";
+        track.src=subtitles;
+        track.default=true;
+        video.appendChild(track);
+    }
+    updatePlayButton();
+}
+
+function updatePlayButton(){playBtn.textContent=video.paused?"▶":"⏸";}
+
+playBtn.onclick=()=>{video.paused?video.play():video.pause();updatePlayButton();};
+video.addEventListener("click",()=>{video.paused?video.play():video.pause();updatePlayButton();});
+document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();video.paused?video.play():video.pause();updatePlayButton();}});
+video.addEventListener("play",updatePlayButton);
+video.addEventListener("pause",updatePlayButton);
+video.addEventListener("timeupdate",()=>{progress.value=(video.currentTime/video.duration)*100||0;});
+progress.oninput=()=>{video.currentTime=(progress.value/100)*video.duration;};
+volume.oninput=()=>{video.volume=volume.value;};
+speed.onchange=()=>{video.playbackRate=speed.value;};
+settingsBtn.onclick=()=>{settingsMenu.style.display=settingsMenu.style.display==="flex"?"none":"flex";};
+fullscreenBtn.onclick=()=>{
+    const container=document.querySelector(".jsplay");
+    if(!document.fullscreenElement){container.requestFullscreen().catch(()=>{});}
+    else{document.exitFullscreen().catch(()=>{});}
+};
+document.getElementById("subFile").onchange = async function(){
+    const file = this.files[0];
+    if(!file) return;
+    const ext = file.name.split('.').pop().toLowerCase();
+    let vttURL = null;
+    if(ext==="vtt"){vttURL = URL.createObjectURL(file);}
+    else if(ext==="srt" || ext==="ass"){
+        const text = await file.text();
+        vttURL = URL.createObjectURL(new Blob([convertToVTT(text, ext)], {type:"text/vtt"}));
+    } else{
+        alert("Desteklenmeyen altyazı formatı");
+        return;
+    }
+    const track=document.createElement("track");
+    track.kind="subtitles";
+    track.label=file.name;
+    track.srclang="tr";
+    track.src=vttURL;
+    track.default=true;
+    video.appendChild(track);
+    settingsMenu.style.display="none";
+};
+
+function convertToVTT(text, ext){
+    if(ext==="srt"){
+        return "WEBVTT\n\n"+text.replace(/\r/g,'').replace(/(\d+)\n(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})/g,"$2 --> $3");
+    } else if(ext==="ass"){
+        let lines = text.split(/\r?\n/).filter(l=>l.startsWith("Dialogue:"));
+        let vtt = "WEBVTT\n\n";
+        lines.forEach((line,i)=>{
+            let parts=line.split(",",9);
+            if(parts.length>=9){
+                let start=assTimeToVTT(parts[1]);
+                let end=assTimeToVTT(parts[2]);
+                let text = parts.slice(9).join(",").replace(/\\N/g,"\n");
+                vtt+=`${i+1}\n${start} --> ${end}\n${text}\n\n`;
+            }
+        });
+        return vtt;
+    }
+    return text;
+}
+
+function assTimeToVTT(t){
+    let [h,m,s,cs]=t.match(/(\d+):(\d+):(\d+)\.(\d+)/).slice(1).map(Number);
+    let ms=cs*10;
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;
+}
+
+const videoURL = getURLParam("video");
+const subURL = getURLParam("sub");
+JSPLAY_LOAD(videoURL, subURL);
+</script>
+</body>
+</html>
